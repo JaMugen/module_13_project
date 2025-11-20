@@ -109,4 +109,3 @@ def test_user_login_invalid_password():
     data = {"username": "johndoe", "password": "short"}
     with pytest.raises(ValidationError):
         UserLogin(**data)
-
