@@ -5,6 +5,7 @@
 #          Relies on 'conftest.py' for database session management and test isolation.
 # ======================================================================================
 
+import datetime
 import pytest
 import logging
 from sqlalchemy import text
@@ -209,6 +210,19 @@ def test_update_with_refresh(db_session, test_user):
     assert test_user.email == new_email, "Email should have been updated"
     assert test_user.updated_at > original_update_time, "Updated time should be newer"
     logger.info(f"Successfully updated user {test_user.id}")
+
+def test_update(db_session,test_user):
+    """
+    Test the User model's update method to ensure it refreshes updated_at and sets attributes.
+    """
+    # Create a user instance with initial values
+    old_time = test_user.updated_at
+    # Call update to change attributes
+    updated = test_user.update(first_name="NewName", email="newemail@example.com")
+    assert updated is test_user
+    assert test_user.first_name == "NewName"
+    assert test_user.email == "newemail@example.com"
+    assert test_user.updated_at > old_time
 
 # ======================================================================================
 # Bulk Operation Tests
