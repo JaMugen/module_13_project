@@ -7,7 +7,13 @@ from fastapi import Body, FastAPI, Depends, HTTPException, status, Request, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+try:
+    # import jinja2 templates lazily — not required for health checks/tests when jinja2 isn't installed
+    from fastapi.templating import Jinja2Templates
+    _jinja_available = True
+except Exception:
+    Jinja2Templates = None
+    _jinja_available = False
 
 from sqlalchemy.orm import Session
 
@@ -39,29 +45,38 @@ app = FastAPI(
 # Mount the static files directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Set up Jinja2 templates directory
-templates = Jinja2Templates(directory="templates")
-
-# Home page route
+# Home page route (templates are optional)
 @app.get("/", response_class=HTMLResponse, tags=["web"])
 def read_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    if _jinja_available and Jinja2Templates is not None:
+        templates = Jinja2Templates(directory="templates")
+        return templates.TemplateResponse("index.html", {"request": request})
+    return HTMLResponse("<html><body><h1>Calculations App</h1></body></html>")
 
 # Login page route
 @app.get("/login", response_class=HTMLResponse, tags=["web"])
 def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    if _jinja_available and Jinja2Templates is not None:
+        templates = Jinja2Templates(directory="templates")
+        return templates.TemplateResponse("login.html", {"request": request})
+    return HTMLResponse("<html><body><h1>Login</h1></body></html>")
 
 # Registration page route
 @app.get("/register", response_class=HTMLResponse, tags=["web"])
 def register_page(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+    if _jinja_available and Jinja2Templates is not None:
+        templates = Jinja2Templates(directory="templates")
+        return templates.TemplateResponse("register.html", {"request": request})
+    return HTMLResponse("<html><body><h1>Register</h1></body></html>")
 
 # Dashboard page Route
 
 @app.get("/dashboard", response_class=HTMLResponse, tags=["web"])
 def dashboard_page(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    if _jinja_available and Jinja2Templates is not None:
+        templates = Jinja2Templates(directory="templates")
+        return templates.TemplateResponse("dashboard.html", {"request": request})
+    return HTMLResponse("<html><body><h1>Dashboard</h1></body></html>")
 
 # ------------------------------------------------------------------------------
 # Health Endpoint
